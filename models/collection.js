@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 
 const collectionSchema = new mongoose.Schema({
-    mangaId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'MangaDetails',
-        required: true
-    },
+    
     title: {
         type: String,
         required: true
@@ -22,11 +18,7 @@ const collectionSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    synopsis: {
-        type: String,
-        required: true
-    },
-    
+
     image: {
         type: String,
         required: true
