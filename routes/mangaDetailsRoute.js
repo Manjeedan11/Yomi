@@ -5,7 +5,7 @@ const { mangaSchema } = require("../models/mangaDetails");
 const MangaDetails = require("../models/mangaDetails");
 const xss = require('xss');
 const serialize = require('serialize-javascript');
-const bcrypt = require('bcrypt');
+
 
 const isAdmin = (req, res, next) => {
     try{
