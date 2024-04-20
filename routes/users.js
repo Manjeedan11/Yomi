@@ -1,13 +1,18 @@
 require('dotenv').config(); 
 const router = require("express").Router();
-const { User } = require("../models/user");
+const session = require ('express-session');
+const { User, createUser } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
 
 const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
-const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
-const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
-const HASH_ALGORITHM = process.env.HASH_ALGORITHM || 'sha512'; 
+
+router.use(session({
+    secret: 'hatsune miku',
+    cookie: {maxAge: 1000 * 60 * 60} , //set to expire after an hour
+    resave: false,
+    saveUnitialized: false
+}))
 
 router.post("/", async (req, res) => {
     try {
@@ -16,26 +21,32 @@ router.post("/", async (req, res) => {
             return res.status(400).send({ message: error.details[0].message });
 
         console.log("Creating a new user");
-        const { salt, hashedPassword } = generateSaltAndHash(req.body.password);
 
-        const user = new User({
+        const salt = crypto.randomBytes(SALT_LENGTH).toString('hex');
+        const hashedPassword = hashPassword(req.body.password, salt);
+
+        const userData = {
             username: req.body.username,
             email: req.body.email,
-            password: hashedPassword,
-            confirmPassword: req.body.confirmPassword, 
-            salt: salt
-        });
+            password: hashedPassword
+        };
 
-        await user.save(); 
+        await createUser(userData);
 
         console.log("User created successfully");
         console.log("Looking up the created user in the database");
         const createdUser = await User.findById(user._id); 
         console.log("User found in the database:", createdUser);
 
+        //here the session variables are set
+        req.session.userId = user._id;
+
         res.status(201).send({ message: "User created successfully" });
     } catch (error) {
         console.error("Error creating user:", error);
+        if (error.message === 'User already exists with the same username or email') {
+            return res.status(400).send({ message: error.message });
+        }
         res.status(500).send({ message: "Internal Server Error" });
     }
 });
@@ -46,25 +57,21 @@ const validate = (data) => {
             .messages({
                 'string.pattern.base': 'Username must contain only letters, numbers, and underscores and be between 3 to 30 characters long'
             }),
-        email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().label("Email")
+        email: Joi.string().email({ minDomainSegments: 2 }).required().label("Email")
             .messages({
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email is required'
             }), 
-        password: Joi.string().required().label("Password"),
-        confirmPassword: Joi.string().valid(Joi.ref('password')).required().label('Confirm Password')
+        password: Joi.string().min(8).required().label("Password")
             .messages({
-                'any.only': 'Passwords must match',
-                'any.required': 'Confirm password is required'
-            })
+                'string.min': 'Password must be minimum 8 characters long',
+            }),
     });
     return schema.validate(data);
 }
 
-function generateSaltAndHash(password) {
-    const salt = crypto.randomBytes(SALT_LENGTH).toString('hex');
-    const hashedPassword = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), HASH_ITERATIONS, HASH_KEY_LENGTH, HASH_ALGORITHM).toString('hex');
-    return { salt, hashedPassword };
+function hashPassword(password, salt) {
+    return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 64, 'sha512').toString('hex');
 }
 
 module.exports = router;
