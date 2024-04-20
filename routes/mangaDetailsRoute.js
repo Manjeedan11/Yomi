@@ -3,6 +3,21 @@ const router = express.Router();
 const { mangaSchema } = require("../models/mangaDetails");
 const MangaDetails = require("../models/mangaDetails");
 
+const isAdmin = (req, res, next) => {
+    try{
+    if (req.session.userRole !== 'admin') {
+        return res.status(403).send({ message: "Access Forbidden: Not an admin" });
+        next(); 
+    }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(403).json({ message: "Access Forbidden: Not an admin" });
+    }
+    
+};
+
+
 // Admin - Add Details
 router.post('/', async (req, res) => {
     try {
@@ -31,7 +46,7 @@ router.post('/', async (req, res) => {
 });
 
 // Admin - UpdateDetails
-router.put('/:id', async (req, res) => {
+router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
         const { title, author, demographic, genre, image, description } = req.body;
@@ -115,7 +130,7 @@ router.get('/', async (req, res) => {
 
 
 //Admin - DeleteDetails
-router.delete('/:id', async (req, res) =>{
+router.delete('/:id', isAdmin, async (req, res) =>{
     try {
         const id = req.params.id;
         
