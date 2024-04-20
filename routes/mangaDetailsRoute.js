@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const MangaDetails = require('./models/mangaDetails');
+const MangaDetails = require('../models/mangaDetails');
 
 // Route to add manga details to the database
 router.post('/add', async (req, res) => {
