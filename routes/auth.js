@@ -57,6 +57,7 @@ router.post("/", async (req, res) => {
 
         //here the session variables are set
         req.session.userId = user._id;
+        req.session.isLoggedIn = true;
         req.session.userRole = 'user';
 
         console.log("Password validated, generating token");

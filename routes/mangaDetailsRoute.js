@@ -1,10 +1,12 @@
 const express = require('express');
+const session = require('express-session');
 const router = express.Router();
 const { mangaSchema } = require("../models/mangaDetails");
 const MangaDetails = require("../models/mangaDetails");
 
 const isAdmin = (req, res, next) => {
     try{
+        console.log("ROLE ",req.session.userRole);
     if (req.session.userRole !== 'admin') {
         return res.status(403).send({ message: "Access Forbidden: Not an admin" });
         next(); 
@@ -19,9 +21,10 @@ const isAdmin = (req, res, next) => {
 
 
 // Admin - Add Details
-router.post('/', async (req, res) => {
+router.post('/', isAdmin, async (req, res) => {
     try {
         const { title, author, demographic, genre, image, description } = req.body;
+        console.log(title, author, demographic, genre, image, description);
         
         
         const newManga = new MangaDetails({

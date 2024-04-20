@@ -88,7 +88,10 @@ router.post("/login", async (req, res) => {
 
         // session variable for Admins
         req.session.adminId = admin._id;
+        req.session.isLoggedIn = true;
         req.session.userRole = 'admin';
+
+
 
        
         const token = generateAuthToken(admin._id);

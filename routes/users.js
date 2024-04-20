@@ -48,7 +48,10 @@ router.post("/", async (req, res) => {
 
         //here the session variables are set
         req.session.userId = foundUser._id;
+        req.session.isLoggedIn = true;
         req.session.userRole = 'user';
+
+
 
         res.status(201).send({ message: "User created successfully" });
     } catch (error) {
