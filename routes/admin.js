@@ -7,7 +7,14 @@ const session = require ('express-session');
 
 router.use(session({
     secret: 'hatsune miku',
-    cookie: {maxAge: 1000 * 60 * 60} , //set to expire after an hour
+    genSid: function(req){
+        return crypto.randomBytes(32).toString('hex');
+    },
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        httpOnly: true,
+        secure: true
+    } , //set to expire after an hour
     resave: false,
     saveUnitialized: false
 }))
@@ -36,6 +43,7 @@ router.post("/login", async (req, res) => {
 
         // session variable for Admins
         req.session.adminId = admin._id;
+        req.session.userRole = 'admin';
 
        
         const token = generateAuthToken(admin._id);
@@ -61,5 +69,16 @@ function validatePassword(password, hashedPassword) {
 function generateAuthToken(adminId) {
    
 }
+
+router.get('/logout', (req, res) => {
+    req.session.destroy(err =>{
+        if (err){
+            console.log(err)
+        } else{
+            res.clearCookie('connect.sid');
+            res.redirect('/')
+        }
+    });
+});
 
 module.exports = router;

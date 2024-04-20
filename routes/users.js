@@ -9,7 +9,14 @@ const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16;
 
 router.use(session({
     secret: 'hatsune miku',
-    cookie: {maxAge: 1000 * 60 * 60} , //set to expire after an hour
+    genSid: function(req){
+        return crypto.randomBytes(32).toString('hex');
+    },
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        httpOnly: true,
+        secure: true
+    } , //set to expire after an hour
     resave: false,
     saveUninitialized: false
 }))
@@ -38,8 +45,9 @@ router.post("/", async (req, res) => {
         const foundUser = await User.findById(createdUser._id); 
         console.log("User found in the database:", foundUser);
 
-        
-        req.session.userId = foundUser._id; // Set session variable with the user ID
+        //here the session variables are set
+        req.session.userId = foundUser._id;
+        req.session.userRole = 'user';
 
         res.status(201).send({ message: "User created successfully" });
     } catch (error) {
@@ -75,5 +83,16 @@ function hashPassword(password, salt) {
     const hashedPassword = derivedKey.toString('hex').slice(0, 8); 
     return hashedPassword;
 }
+
+router.get('/logout', (req, res) => {
+    req.session.destroy(err =>{
+        if (err){
+            console.log(err)
+        } else{
+            res.clearCookie('connect.sid');
+            res.redirect('/')
+        }
+    });
+});
 
 module.exports = router;

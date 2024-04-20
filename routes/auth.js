@@ -3,10 +3,25 @@ const router = require("express").Router();
 const { User } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
+const session = require ('express-session');
 
 const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
 const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
 const HASH_ALGORITHM = process.env.HASH_ALGORITHM || 'sha512'; 
+
+router.use(session({
+    secret: 'hatsune miku',
+    genSid: function(req){
+        return crypto.randomBytes(32).toString('hex');
+    },
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        httpOnly: true,
+        secure: true
+    } , //set to expire after an hour
+    resave: false,
+    saveUninitialized: false
+}))
 
 router.post("/", async (req, res) => {
     try {
@@ -33,13 +48,21 @@ router.post("/", async (req, res) => {
             return res.status(401).send({ message: "Invalid Email or Password" });
         }
 
+        //here the session variables are set
+        req.session.userId = user._id;
+        req.session.userRole = 'user';
+
         console.log("Password validated, generating token");
         const token = generateAuthToken(user._id);
         res.status(200).send({ data: token, message: "Logged in successfully" });
+
+
     } catch (error) {
         console.error("Error during authentication:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
+
+    
 });
 
 const validate = (data) => {
