@@ -18,15 +18,11 @@ app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/manga", mangaDetailsRoute);
 app.use("/manga/:id", mangaDetailsRoute);
-app.use("/collections/:id", collection);
+app.use("/collections/", collection);
 app.use("/admin", admin);
 
 
-<<<<<<< HEAD
-const port = process.env.PORT || 6000;
-=======
 const port = process.env.PORT || 5000;
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
 app.listen(port, () => console.log(`Listening on port ${port}`))
 
 app.get('/', (request, response) => {

@@ -1,53 +1,62 @@
-const express = require('express');
-const router = express.Router();
-const { Collection } = require("../models/collection");
-const { mangaSchema } = require("../models/mangaDetails");
+const router = require("express").Router();
+const { User } = require("../models/user");
+const { mangaId } = require("../models/mangaDetails");
 
-//Add manga
-router.post('/:id', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
-        const mangaId = req.params.id;
+        const userId = req.session.userId; // Accessing userId from session
+        const mangaId = req.body.mangaId;
 
-        // Check if manga details exist
-        const manga = await mangaSchema.findById(mangaId);
-        if (!manga) {
-            return res.status(404).json({ message: "Manga not found" });
-        }
-        
-        const newCollectionItem = new Collection({
-            title: manga.title,
-            author: manga.author,
-            demographic: manga.demographic,
-            genre: manga.genre,
-            image: manga.image,
-            description: manga.description
-        });
+        if (!userId || !mangaId)
+            return res.status(400).send({ message: "User ID and Manga ID are required" });
 
-        
-        await newCollectionItem.save();
+        let user = await User.findById(userId);
 
-        res.json({ message: "Manga added to collection successfully", mangaDetails: manga });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Internal server error" });
+        if (!user)
+            return res.status(404).send({ message: "User not found" });
+
+        if (!user.collection)
+            user.collection = [];
+
+        if (!user.collection.includes(mangaId))
+            user.collection.push(mangaId);
+
+        await user.save();
+
+        res.status(200).send({ message: "Manga added to collection successfully" });
+    } catch (error) {
+        console.error("Error adding manga to collection:", error);
+        res.status(500).send({ message: "Internal Server Error" });
     }
 });
 
-// Delete 
-router.delete('/:id', async (req, res) => {
+router.delete('/', async (req, res) => {
     try {
-        const collectionItemId = req.params.id;
+        const userId = req.session.userId; // Accessing userId from session
+        const mangaId = req.body.mangaId;
 
-        const collectionItem = await Collection.findById(collectionItemId);
-        if (!collectionItem) {
-            return res.status(404).json({ message: "Collection item not found" });
+        if (!userId || !mangaId)
+            return res.status(400).send({ message: "User ID and Manga ID are required" });
+
+        let user = await User.findById(userId);
+
+        if (!user)
+            return res.status(404).send({ message: "User not found" });
+
+        if (!user.collection)
+            user.collection = [];
+
+        const index = user.collection.indexOf(mangaId);
+        if (index !== -1) {
+            user.collection.splice(index, 1);
+            await user.save();
+            res.status(200).send({ message: "Manga removed from collection successfully" });
+        } else {
+            res.status(404).send({ message: "Manga not found in user's collection" });
         }
-        await Collection.findByIdAndDelete(collectionItemId);
-
-        res.json({ message: "Collection item deleted successfully", deletedItem: collectionItem });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Internal server error" });
+    } catch (error) {
+        console.error("Error removing manga from collection:", error);
+        res.status(500).send({ message: "Internal Server Error" });
     }
 });
 

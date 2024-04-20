@@ -95,22 +95,11 @@ const validate = (data) => {
     return schema.validate(sanitizedData);
 }
 
-<<<<<<< HEAD
-async function validatePassword(password, hashedPassword) {
-    try {
-        const match = await bcrypt.compare(password, hashedPassword);
-        return match;
-    } catch (error) {
-        console.error('Error validating password:', error);
-        return false;
-    }
-=======
 function validatePassword(password, salt, hashedPassword) {
     const hashedInputPassword = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), HASH_ITERATIONS, HASH_KEY_LENGTH, HASH_ALGORITHM).toString('hex');
     console.log("hashed inpt: ", hashedInputPassword);
     console.log("hashed pass:", hashedPassword);
     return hashedInputPassword === hashedPassword;
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
 }
 
 function generateAuthToken(userId) {

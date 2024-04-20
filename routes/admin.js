@@ -76,12 +76,7 @@ router.post("/login", async (req, res) => {
         if (error)
             return res.status(400).send({ message: error.details[0].message });
 
-<<<<<<< HEAD
         const admin = await Admin.findOne({ email: sanitizedEmail });
-=======
-        const admin = await Admin.findOne({ email: req.body.email });
-        console.log(admin);
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
         if (!admin) {
             return res.status(401).send({ message: "Invalid Email or Password" });
         }
@@ -90,11 +85,7 @@ router.post("/login", async (req, res) => {
             return res.status(500).send({ message: "Password not found for the admin" });
         }
 
-<<<<<<< HEAD
         const passwordMatch = validatePassword(sanitizedPassword, admin.password);
-=======
-        const passwordMatch = validatePassword(req.body.password, admin.salt, admin.password);
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
         if (!passwordMatch) {
             return res.status(401).send({ message: "Invalid Email or Password" });
         }

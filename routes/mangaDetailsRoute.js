@@ -24,7 +24,6 @@ const isAdmin = (req, res, next) => {
 // Admin - Add Details
 router.post('/', async (req, res) => {
     try {
-<<<<<<< HEAD
         //Destructure and sanitize user inputs
         const { title, author, demographic, genre, synopsis, image, description } = req.body;
         const sanitizedTitle = xss(title);
@@ -44,18 +43,6 @@ router.post('/', async (req, res) => {
             synopsis: sanitizedSynopsis,
             image: sanitizedImage,
             description: sanitizedDescription
-=======
-        const { title, author, demographic, genre, image, description } = req.body;
-        
-        
-        const newManga = new MangaDetails({
-            title,
-            author,
-            demographic,
-            genre,
-            image,
-            description
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
         });
 
         // Save the manga details to the database
@@ -80,37 +67,22 @@ router.post('/', async (req, res) => {
 router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-<<<<<<< HEAD
-        const { title, author, demographic, genre, synopsis, image, description } = req.body;
-
-=======
         const { title, author, demographic, genre, image, description } = req.body;
         console.log(id);
         
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
         
         let manga = await MangaDetails.findById(id);
         if (!manga) {
             return res.status(404).json({ message: "Manga details not found" });
         }
 
-<<<<<<< HEAD
         // manga details here but they are untouchable
         manga.title = xss(title);
         manga.author = xss(author);
         manga.demographic = xss(demographic);
         manga.genre = xss(genre);
-        manga.synopsis = xss(synopsis);
         manga.image = xss(image);
         manga.description = xss(description);
-=======
-        manga.title = title;
-        manga.author = author;
-        manga.demographic = demographic;
-        manga.genre = genre;
-        manga.image = image;
-        manga.description = description;
->>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
 
         
         const updatedManga = await manga.save();
