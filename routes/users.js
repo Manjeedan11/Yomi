@@ -9,7 +9,14 @@ const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16;
 
 router.use(session({
     secret: 'hatsune miku',
-    cookie: {maxAge: 1000 * 60 * 60} , //set to expire after an hour
+    genSid: function(req){
+        return crypto.randomBytes(32).toString('hex');
+    },
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        httpOnly: true,
+        secure: true
+    } , //set to expire after an hour
     resave: false,
     saveUnitialized: false
 }))
@@ -40,6 +47,7 @@ router.post("/", async (req, res) => {
 
         //here the session variables are set
         req.session.userId = user._id;
+        req.session.userRole = 'user';
 
         res.status(201).send({ message: "User created successfully" });
     } catch (error) {
@@ -73,5 +81,16 @@ const validate = (data) => {
 function hashPassword(password, salt) {
     return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 64, 'sha512').toString('hex');
 }
+
+router.get('/logout', (req, res) => {
+    req.session.destroy(err =>{
+        if (err){
+            console.log(err)
+        } else{
+            res.clearCookie('connect.sid');
+            res.redirect('/')
+        }
+    });
+});
 
 module.exports = router;
