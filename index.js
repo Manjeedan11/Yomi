@@ -6,7 +6,7 @@ const connection = require("./db");
 const userRoutes = require('./routes/users');
 const authRoutes = require('./routes/auth');
 const mangaDetailsRoute = require('./routes/mangaDetailsRoute');
-const collections = require('./routes/collectionRoute')
+const collection = require('./routes/collectionRoute')
 
 
 connection();
@@ -18,7 +18,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/manga", mangaDetailsRoute);
 app.use("/manga/:id", mangaDetailsRoute);
-app.use("/collections/:id", collections)
+app.use("/collections/:id", collection);
 
 
 const port = process.env.PORT || 5000;
