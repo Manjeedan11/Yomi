@@ -31,4 +31,33 @@ router.post('/', async (req, res) => {
     }
 });
 
+
+router.put('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, author, demographic, genre, synopsis, image, description } = req.body;
+        
+        
+        let manga = await MangaDetails.findById(id);
+        if (!manga) {
+            return res.status(404).json({ message: "Manga details not found" });
+        }
+
+        manga.title = title;
+        manga.author = author;
+        manga.demographic = demographic;
+        manga.genre = genre;
+        manga.synopsis = synopsis;
+        manga.image = image;
+        manga.description = description;
+
+        const updatedManga = await manga.save();
+
+        res.json(updatedManga);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
 module.exports = router;
