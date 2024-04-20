@@ -6,7 +6,7 @@ const MangaDetails = require("../models/mangaDetails");
 
 router.post('/', async (req, res) => {
     try {
-        const { title, author, demographic, genre, synopsis } = req.body;
+        const { title, author, demographic, genre, synopsis, image, description } = req.body;
         
         
         const newManga = new MangaDetails({
@@ -14,7 +14,9 @@ router.post('/', async (req, res) => {
             author,
             demographic,
             genre,
-            synopsis
+            synopsis,
+            image,
+            description
         });
 
         const savedManga = await newManga.save();
