@@ -42,7 +42,7 @@ const validate = (data) => {
             'string.email': 'Invalid email format',
             'string.empty': 'Email is required'
         }), 
-    password: Joi.string().min(8).required().label("Password")
+    password: Joi.string().length(8).required().label("Password")
         .messages({
             'string.min': 'Password must be minimum 8 characters long',
         })
@@ -51,8 +51,9 @@ const validate = (data) => {
 };
 
 const hashPassword = (password, salt) => {
-    return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 64, 'sha512').toString('hex');
+    return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 8, 'sha512').toString('hex');
 };
+
 
 const createUser = async (userData) => {
     try {

@@ -61,11 +61,30 @@ router.put('/:id', async (req, res) => {
 });
 
 //Users - SearchDetails
-router.get('/:title', async (req, res) => {
+router.get('/title/:title', async (req, res) => {
     try {
         const title = req.params.title;
+        console.log(title);
         
         const manga = await MangaDetails.findOne({ title: title });
+
+        if (!manga) {
+            return res.status(404).json({ message: "Manga not found" });
+        }
+
+        res.json(manga);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+//Users - Get Details by Id
+router.get('/id/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        
+        const manga = await MangaDetails.findById(id);
 
         if (!manga) {
             return res.status(404).json({ message: "Manga details not found" });
@@ -77,6 +96,24 @@ router.get('/:title', async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
+//Users - get all manga
+router.get('/all', async (req, res) => {
+    try {
+        
+        const manga = await MangaDetails.find({});
+
+        if (!manga) {
+            return res.status(404).json({ message: "No Manga" });
+        }
+
+        res.json(manga);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
 
 //Admin - DeleteDetails
 router.delete('/:id', async (req, res) =>{

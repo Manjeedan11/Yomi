@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
             return res.status(401).send({ message: "Invalid Email or Password" });
         }
 
-        console.log("User found, validating password");
+        console.log("validating password");
         if (!user.salt || !user.password) {
             console.error("Salt or hashed password not found for the user");
             return res.status(500).send({ message: "Salt or hashed password not found for the user" });
@@ -51,7 +51,7 @@ const validate = (data) => {
             }),
         password: Joi.string().length(8).required().label("Password")
             .messages({
-                'string.length': 'Password must be exactly 8 characters long',
+                'string.length': 'Password must be minimum 8 characters long',
             }),
     });
     return schema.validate(data);

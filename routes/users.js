@@ -18,7 +18,7 @@ router.use(session({
         secure: true
     } , //set to expire after an hour
     resave: false,
-    saveUnitialized: false
+    saveUninitialized: false
 }))
 
 router.post("/", async (req, res) => {
@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
             password: hashedPassword
         };
 
-        await createUser(userData);
+        const createdUser = await createUser(userData); 
 
         console.log("User created successfully");
         console.log("Looking up the created user in the database");
@@ -70,7 +70,7 @@ const validate = (data) => {
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email is required'
             }), 
-        password: Joi.string().min(8).required().label("Password")
+        password: Joi.string().length(8).required().label("Password")
             .messages({
                 'string.min': 'Password must be minimum 8 characters long',
             }),
@@ -79,7 +79,9 @@ const validate = (data) => {
 }
 
 function hashPassword(password, salt) {
-    return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 64, 'sha512').toString('hex');
+    const derivedKey = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 8, 'sha512');
+    const hashedPassword = derivedKey.toString('hex').slice(0, 8); 
+    return hashedPassword;
 }
 
 router.get('/logout', (req, res) => {
