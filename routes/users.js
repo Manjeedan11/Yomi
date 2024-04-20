@@ -4,6 +4,8 @@ const session = require ('express-session');
 const { User, createUser } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
+const xss = require('xss');
+
 
 const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
 const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
@@ -26,6 +28,12 @@ router.use(session({
 
 router.post("/", async (req, res) => {
     try {
+        // Sanitize user inputs to prevent XSS attacks
+        const { username, email, password } = req.body;
+        const sanitizedUsername = xss(username);
+        const sanitizedEmail = xss(email);
+        const sanitizedPassword = xss(password);
+
         const { error } = validate(req.body);
         if (error)
             return res.status(400).send({ message: error.details[0].message });
@@ -39,6 +47,7 @@ router.post("/", async (req, res) => {
             password: req.body.password
         };
 
+        // Create the user
         const createdUser = await createUser(userData); 
 
         console.log("User created successfully");
@@ -46,7 +55,7 @@ router.post("/", async (req, res) => {
         const foundUser = await User.findById(createdUser._id); 
         console.log("User found in the database:", foundUser);
 
-        //here the session variables are set
+        // Set session variables
         req.session.userId = foundUser._id;
         req.session.isLoggedIn = true;
         req.session.userRole = 'user';

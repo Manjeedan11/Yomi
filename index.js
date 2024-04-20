@@ -40,7 +40,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/manga", mangaDetailsRoute);
 app.use("/manga/:id", mangaDetailsRoute);
-app.use("/collections/:id", collection);
+app.use("/collections/", collection);
 app.use("/admin", admin);
 
 // Root route handler for testing session
