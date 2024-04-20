@@ -34,7 +34,8 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, author, demographic, genre, synopsis, image, description } = req.body;
+        const { title, author, demographic, genre, image, description } = req.body;
+        console.log(id);
         
         
         let manga = await MangaDetails.findById(id);

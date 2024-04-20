@@ -6,6 +6,9 @@ const Joi = require("joi");
 const crypto = require("crypto");
 
 const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
+const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
+const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
+const HASH_ALGORITHM = process.env.HASH_ALGORITHM || 'sha512'; 
 
 router.use(session({
     secret: 'hatsune miku',
@@ -70,7 +73,7 @@ const validate = (data) => {
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email is required'
             }), 
-        password: Joi.string().length(8).required().label("Password")
+        password: Joi.string().min(8).required().label("Password")
             .messages({
                 'string.min': 'Password must be minimum 8 characters long',
             }),
@@ -79,9 +82,7 @@ const validate = (data) => {
 }
 
 function hashPassword(password, salt) {
-    const derivedKey = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 8, 'sha512');
-    const hashedPassword = derivedKey.toString('hex').slice(0, 8); 
-    return hashedPassword;
+    return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), HASH_ITERATIONS, HASH_KEY_LENGTH, HASH_ALGORITHM).toString('hex');
 }
 
 router.get('/logout', (req, res) => {
