@@ -51,7 +51,7 @@ const validate = (data) => {
             }),
         password: Joi.string().length(8).required().label("Password")
             .messages({
-                'string.length': 'Password must be exactly 8 characters long',
+                'string.length': 'Password must be minimum 8 characters long',
             }),
     });
     return schema.validate(data);
