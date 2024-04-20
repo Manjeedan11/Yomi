@@ -1,24 +1,21 @@
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
-const passwordComplexity = require("joi-password-complexity");
 const crypto = require("crypto");
 
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
-        required: true
+        required: true,
+        unique: true 
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true 
     },
     password: {
         type: String,
-        required: true
-    },
-    confirmPassword: {
-        type: String, 
         required: true
     },
     salt: {
@@ -27,7 +24,7 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-userSchema.methods.generateAuthToken = function(){
+userSchema.methods.generateAuthToken = function() {
     const token = jwt.sign({_id: this._id}, process.env.JWTPRIVATEKEY, {expiresIn: "7d"}); 
     return token;
 };
@@ -45,11 +42,9 @@ const validate = (data) => {
             'string.email': 'Invalid email format',
             'string.empty': 'Email is required'
         }), 
-    password: passwordComplexity().required().label("Password"),
-    confirmPassword: Joi.string().valid(Joi.ref('password')).required().label('Confirm Password')
+    password: Joi.string().min(8).required().label("Password")
         .messages({
-            'any.only': 'Passwords must match',
-            'any.required': 'Confirm password is required'
+            'string.min': 'Password must be minimum 8 characters long',
         })
    });
    return schema.validate(data);
@@ -61,24 +56,24 @@ const hashPassword = (password, salt) => {
 
 const createUser = async (userData) => {
     try {
-        
         const { error } = validate(userData);
         if (error) {
             throw new Error(error.details[0].message);
         }
 
-        
-        const salt = crypto.randomBytes(16).toString('hex');
+        // Check if user already exists
+        const existingUser = await User.findOne({ $or: [{ email: userData.email }, { username: userData.username }] });
+        if (existingUser) {
+            throw new Error('User already exists with the same username or email');
+        }
 
-        
+        const salt = crypto.randomBytes(16).toString('hex');
         const hashedPassword = hashPassword(userData.password, salt);
 
-        
         const user = new User({
             username: userData.username,
             email: userData.email,
             password: hashedPassword,
-            confirmPassword: userData.confirmPassword, 
             salt: salt 
         });
 

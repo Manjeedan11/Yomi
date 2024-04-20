@@ -49,7 +49,10 @@ const validate = (data) => {
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email is required'
             }),
-        password: Joi.string().required().label("Password")
+        password: Joi.string().length(8).required().label("Password")
+            .messages({
+                'string.length': 'Password must be exactly 8 characters long',
+            }),
     });
     return schema.validate(data);
 }
@@ -60,7 +63,7 @@ function validatePassword(password, salt, hashedPassword) {
 }
 
 function generateAuthToken(userId) {
-    //function defined to generate token (JSON format) if the login credentials are correct for testing purposes
+    // Function defined to generate token (JSON format) if the login credentials are correct for testing purposes
 }
 
 module.exports = router;
