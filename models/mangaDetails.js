@@ -1,21 +1,30 @@
 const mongoose = require("mongoose");
 
 const mangaSchema = new mongoose.Schema({
+    
     title: {
         type: String,
-        required: true
+        required: [true, "Title is required"]
     },
+    
     author: {
         type: String,
-        required: true
+        required: [true, "Author is required"]
     },
+    
     demographic: {
         type: String,
-        required: true
+        required: [true, "Demographic is required"]
     },
+    
     genre: {
         type: String,
-        required: true
+        required: [true, "Demographic is required"]
+    },
+    
+    synopsis: {
+        type: String,
+        required: [true, "synopsis is required"]
     }
 }, {
     timestamps: true
