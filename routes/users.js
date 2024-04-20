@@ -19,10 +19,10 @@ router.post("/", async (req, res) => {
         const { salt, hashedPassword } = generateSaltAndHash(req.body.password);
 
         const user = new User({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
+            username: req.body.username,
             email: req.body.email,
             password: hashedPassword,
+            confirmPassword: req.body.confirmPassword, 
             salt: salt
         });
 
@@ -42,10 +42,21 @@ router.post("/", async (req, res) => {
 
 const validate = (data) => {
     const schema = Joi.object({
-        firstName: Joi.string().required().label("First Name"),
-        lastName: Joi.string().required().label("Last Name"),
-        email: Joi.string().email().required().label("Email"),
-        password: Joi.string().required().label("Password")
+        username: Joi.string().regex(/^[a-zA-Z0-9_]{3,30}$/).required().label("Username")
+            .messages({
+                'string.pattern.base': 'Username must contain only letters, numbers, and underscores and be between 3 to 30 characters long'
+            }),
+        email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().label("Email")
+            .messages({
+                'string.email': 'Invalid email format',
+                'string.empty': 'Email is required'
+            }), 
+        password: Joi.string().required().label("Password"),
+        confirmPassword: Joi.string().valid(Joi.ref('password')).required().label('Confirm Password')
+            .messages({
+                'any.only': 'Passwords must match',
+                'any.required': 'Confirm password is required'
+            })
     });
     return schema.validate(data);
 }

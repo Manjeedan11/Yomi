@@ -4,7 +4,6 @@ const { User } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
 
-const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
 const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
 const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
 const HASH_ALGORITHM = process.env.HASH_ALGORITHM || 'sha512'; 
@@ -45,7 +44,11 @@ router.post("/", async (req, res) => {
 
 const validate = (data) => {
     const schema = Joi.object({
-        email: Joi.string().email().required().label("Email"),
+        email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().label("Email")
+            .messages({
+                'string.email': 'Invalid email format',
+                'string.empty': 'Email is required'
+            }),
         password: Joi.string().required().label("Password")
     });
     return schema.validate(data);
@@ -57,7 +60,7 @@ function validatePassword(password, salt, hashedPassword) {
 }
 
 function generateAuthToken(userId) {
-    // Generating and returning the authentication token to test whether we logged in
+    //function defined to generate token (JSON format) if the login credentials are correct for testing purposes
 }
 
 module.exports = router;

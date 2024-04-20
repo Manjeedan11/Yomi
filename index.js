@@ -13,8 +13,8 @@ connection();
 app.use(express.json())
 app.use(cors());
 
-app.use("/api/register", userRoutes);
-app.use("/api/login", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/manga", mangaDetailsRoute);
 app.use("/manga/:id", mangaDetailsRoute);
 
