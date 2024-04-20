@@ -6,7 +6,7 @@ const MangaDetails = require("../models/mangaDetails");
 // Admin - Add Details
 router.post('/', async (req, res) => {
     try {
-        const { title, author, demographic, genre, synopsis, image, description } = req.body;
+        const { title, author, demographic, genre, image, description } = req.body;
         
         
         const newManga = new MangaDetails({
