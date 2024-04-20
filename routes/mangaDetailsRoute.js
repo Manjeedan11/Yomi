@@ -8,18 +8,18 @@ const serialize = require('serialize-javascript');
 
 
 const isAdmin = (req, res, next) => {
-    try{
-        console.log("ROLE ",req.session.userRole);
-    if (req.session.userRole !== 'admin') {
-        return res.status(403).send({ message: "Access Forbidden: Not an admin" });
-        next(); 
-    }
+    try {
+        console.log("ROLE ", req.session.userRole);
+        if (req.session.userRole !== 'admin') {
+            return res.status(403).send({ message: "Access Forbidden: Not an admin" });
+            next();
+        }
     }
     catch (error) {
         console.error(error);
         res.status(403).json({ message: "Access Forbidden: Not an admin" });
     }
-    
+
 };
 
 
@@ -72,8 +72,8 @@ router.put('/:id', isAdmin, async (req, res) => {
         const { id } = req.params;
         const { title, author, demographic, genre, image, description } = req.body;
         console.log(id);
-        
-        
+
+
         let manga = await MangaDetails.findById(id);
         if (!manga) {
             return res.status(404).json({ message: "Manga details not found" });
@@ -87,13 +87,13 @@ router.put('/:id', isAdmin, async (req, res) => {
         manga.image = xss(image);
         manga.description = xss(description);
 
-        
+
         const updatedManga = await manga.save();
 
-        
+
         res.json(updatedManga);
     } catch (err) {
-        
+
         console.error(err);
         res.status(500).json({ message: "Internal server error" });
     }
@@ -105,19 +105,17 @@ router.put('/:id', isAdmin, async (req, res) => {
 router.get('/title/:title', async (req, res) => {
     try {
         const sanitizedTitle = xss(req.params.title);
-        title.push(sanitizedTitle);
-        res.redirect('/')
         console.log(sanitizedTitle);
-        
+
         const manga = await MangaDetails.findOne({ title: sanitizedTitle });
 
         if (!manga) {
             return res.status(404).json({ message: "Manga not found" });
         }
         const serializedManga = serialize(manga);
-        res.setHeader('Content-Type', 'application/json'); 
-        res.status(200).send(serializedManga);
+        res.setHeader('Content-Type', 'application/json');
         res.json(manga);
+        res.status(200).send(serializedManga);
 
     } catch (err) {
         console.error(err);
@@ -126,10 +124,10 @@ router.get('/title/:title', async (req, res) => {
 });
 
 //Users - Get Details by Id
-router.get('/:id', async (req, res) => {
+router.get('/id/:id', async (req, res) => {
     try {
         const id = req.params.id;
-        
+
         const manga = await MangaDetails.findById(id);
 
         if (!manga) {
@@ -146,7 +144,7 @@ router.get('/:id', async (req, res) => {
 //Users - get all manga
 router.get('/', async (req, res) => {
     try {
-        
+
         const manga = await MangaDetails.find({});
 
         if (!manga) {
@@ -162,10 +160,10 @@ router.get('/', async (req, res) => {
 
 
 //Admin - DeleteDetails
-router.delete('/:id', isAdmin, async (req, res) =>{
+router.delete('/:id', isAdmin, async (req, res) => {
     try {
         const id = req.params.id;
-        
+
         const manga = await MangaDetails.findByIdAndDelete(id);
 
         if (!manga) {
@@ -174,7 +172,7 @@ router.delete('/:id', isAdmin, async (req, res) =>{
 
         res.json(manga);
     } catch (error) {
-        res.status(500).json({message: "Unable to delete manga"})
+        res.status(500).json({ message: "Unable to delete manga" })
     }
 })
 

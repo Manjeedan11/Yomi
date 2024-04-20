@@ -4,6 +4,7 @@ const { User } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
 const session = require ('express-session');
+const xss = require('xss');
 
 const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
 const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 

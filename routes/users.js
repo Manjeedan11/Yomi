@@ -42,27 +42,22 @@ router.post("/", async (req, res) => {
 
 
         const userData = {
-            username: req.body.username,
-            email: req.body.email,
-            password: req.body.password
+            username: sanitizedUsername,
+            email: sanitizedEmail,
+            password: sanitizedPassword
         };
 
         // Create the user
         const createdUser = await createUser(userData); 
 
         console.log("User created successfully");
-        console.log("Looking up the created user in the database");
         const foundUser = await User.findById(createdUser._id); 
-        console.log("User found in the database:", foundUser);
-
         // Set session variables
         req.session.userId = foundUser._id;
         req.session.isLoggedIn = true;
         req.session.userRole = 'user';
-
-
-
         res.status(201).send({ message: "User created successfully" });
+        
     } catch (error) {
         console.error("Error creating user:", error);
         if (error.message === 'User already exists with the same username or email') {
