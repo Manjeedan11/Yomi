@@ -14,7 +14,6 @@ router.post('/', async (req, res) => {
             author,
             demographic,
             genre,
-            synopsis,
             image,
             description
         });
@@ -47,7 +46,6 @@ router.put('/:id', async (req, res) => {
         manga.author = author;
         manga.demographic = demographic;
         manga.genre = genre;
-        manga.synopsis = synopsis;
         manga.image = image;
         manga.description = description;
 
@@ -80,7 +78,7 @@ router.get('/title/:title', async (req, res) => {
 });
 
 //Users - Get Details by Id
-router.get('/id/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const id = req.params.id;
         
@@ -98,7 +96,7 @@ router.get('/id/:id', async (req, res) => {
 });
 
 //Users - get all manga
-router.get('/all', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         
         const manga = await MangaDetails.find({});
