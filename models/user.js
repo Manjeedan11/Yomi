@@ -8,7 +8,6 @@ const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000;
 const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
 const HASH_ALGORITHM = process.env.HASH_ALGORITHM || 'sha512'; 
 
-
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -74,7 +73,7 @@ const createUser = async (userData) => {
             throw new Error('User already exists with the same username or email');
         }
 
-        const salt = crypto.randomBytes(16).toString('hex');
+        const salt = crypto.randomBytes(SALT_LENGTH).toString('hex');
         const hashedPassword = hashPassword(userData.password, salt);
 
         const user = new User({

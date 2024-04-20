@@ -32,13 +32,11 @@ router.post("/", async (req, res) => {
 
         console.log("Creating a new user");
 
-        const salt = crypto.randomBytes(SALT_LENGTH).toString('hex');
-        const hashedPassword = hashPassword(req.body.password, salt);
 
         const userData = {
             username: req.body.username,
             email: req.body.email,
-            password: hashedPassword
+            password: req.body.password
         };
 
         const createdUser = await createUser(userData); 
