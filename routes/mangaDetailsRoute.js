@@ -3,7 +3,7 @@ const router = express.Router();
 const { mangaSchema } = require("../models/mangaDetails");
 const MangaDetails = require("../models/mangaDetails");
 
-
+// Admin - Add Details
 router.post('/', async (req, res) => {
     try {
         const { title, author, demographic, genre, synopsis, image, description } = req.body;
@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-
+// Admin - UpdateDetails
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -60,7 +60,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-//Users can search for manga by title
+//Users - SearchDetails
 router.get('/:title', async (req, res) => {
     try {
         const title = req.params.title;
