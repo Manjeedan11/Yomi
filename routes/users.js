@@ -42,11 +42,11 @@ router.post("/", async (req, res) => {
 
         console.log("User created successfully");
         console.log("Looking up the created user in the database");
-        const createdUser = await User.findById(user._id); 
-        console.log("User found in the database:", createdUser);
+        const foundUser = await User.findById(createdUser._id); 
+        console.log("User found in the database:", foundUser);
 
         //here the session variables are set
-        req.session.userId = user._id;
+        req.session.userId = foundUser._id;
         req.session.userRole = 'user';
 
         res.status(201).send({ message: "User created successfully" });
