@@ -21,11 +21,6 @@ const mangaSchema = new mongoose.Schema({
         type: String,
         required: [true, "Demographic is required"]
     },
-    
-    synopsis: {
-        type: String,
-        required: [true, "synopsis is required"]
-    },
 
     image: {
         type: String,

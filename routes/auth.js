@@ -6,9 +6,11 @@ const crypto = require("crypto");
 const session = require ('express-session');
 const bcrypt = require('bcrypt');
 
+const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
 const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
 const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
 const HASH_ALGORITHM = process.env.HASH_ALGORITHM || 'sha512'; 
+
 
 router.use(session({
     secret: 'hatsune miku',
@@ -44,9 +46,12 @@ router.post("/", async (req, res) => {
 
         console.log("validating password");
         if (!user.salt || !user.password) {
+            
             console.error("Salt or hashed password not found for the user");
             return res.status(500).send({ message: "Salt or hashed password not found for the user" });
         }
+        
+        console.log(user);
 
         const passwordMatch = validatePassword(sanitizedPassword, user.salt, user.password);
         if (!passwordMatch) {
@@ -54,13 +59,15 @@ router.post("/", async (req, res) => {
             return res.status(401).send({ message: "Invalid Email or Password" });
         }
 
+        
+
         //here the session variables are set
         req.session.userId = user._id;
         req.session.userRole = 'user';
 
         console.log("Password validated, generating token");
         const token = generateAuthToken(user._id);
-        res.status(200).send({ data: token, message: "Logged in successfully" });
+        res.status(200).send({ data: token, user:user.username, message: "Logged in successfully" });
 
     } catch (error) {
         console.error("Error during authentication:", error);
@@ -83,14 +90,12 @@ const validate = (data) => {
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email is required'
             }),
-        password: Joi.string().length(8).required().label("Password")
-            .messages({
-                'string.length': 'Password must be minimum 8 characters long',
-            }),
+        password: Joi.string().required().label("Password")
     });
     return schema.validate(sanitizedData);
 }
 
+<<<<<<< HEAD
 async function validatePassword(password, hashedPassword) {
     try {
         const match = await bcrypt.compare(password, hashedPassword);
@@ -99,6 +104,13 @@ async function validatePassword(password, hashedPassword) {
         console.error('Error validating password:', error);
         return false;
     }
+=======
+function validatePassword(password, salt, hashedPassword) {
+    const hashedInputPassword = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), HASH_ITERATIONS, HASH_KEY_LENGTH, HASH_ALGORITHM).toString('hex');
+    console.log("hashed inpt: ", hashedInputPassword);
+    console.log("hashed pass:", hashedPassword);
+    return hashedInputPassword === hashedPassword;
+>>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
 }
 
 function generateAuthToken(userId) {

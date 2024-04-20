@@ -6,9 +6,25 @@ const xss = require('xss');
 const serialize = require('serialize-javascript');
 const bcrypt = require('bcrypt');
 
+const isAdmin = (req, res, next) => {
+    try{
+    if (req.session.userRole !== 'admin') {
+        return res.status(403).send({ message: "Access Forbidden: Not an admin" });
+        next(); 
+    }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(403).json({ message: "Access Forbidden: Not an admin" });
+    }
+    
+};
+
+
 // Admin - Add Details
 router.post('/', async (req, res) => {
     try {
+<<<<<<< HEAD
         //Destructure and sanitize user inputs
         const { title, author, demographic, genre, synopsis, image, description } = req.body;
         const sanitizedTitle = xss(title);
@@ -28,6 +44,18 @@ router.post('/', async (req, res) => {
             synopsis: sanitizedSynopsis,
             image: sanitizedImage,
             description: sanitizedDescription
+=======
+        const { title, author, demographic, genre, image, description } = req.body;
+        
+        
+        const newManga = new MangaDetails({
+            title,
+            author,
+            demographic,
+            genre,
+            image,
+            description
+>>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
         });
 
         // Save the manga details to the database
@@ -49,17 +77,24 @@ router.post('/', async (req, res) => {
 
 
 // Admin - UpdateDetails
-router.put('/:id', async (req, res) => {
+router.put('/:id', isAdmin, async (req, res) => {
     try {
         const { id } = req.params;
+<<<<<<< HEAD
         const { title, author, demographic, genre, synopsis, image, description } = req.body;
 
+=======
+        const { title, author, demographic, genre, image, description } = req.body;
+        console.log(id);
+        
+>>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
         
         let manga = await MangaDetails.findById(id);
         if (!manga) {
             return res.status(404).json({ message: "Manga details not found" });
         }
 
+<<<<<<< HEAD
         // manga details here but they are untouchable
         manga.title = xss(title);
         manga.author = xss(author);
@@ -68,6 +103,14 @@ router.put('/:id', async (req, res) => {
         manga.synopsis = xss(synopsis);
         manga.image = xss(image);
         manga.description = xss(description);
+=======
+        manga.title = title;
+        manga.author = author;
+        manga.demographic = demographic;
+        manga.genre = genre;
+        manga.image = image;
+        manga.description = description;
+>>>>>>> 13aa944ab9e6f40834c247a145234420ed806acd
 
         
         const updatedManga = await manga.save();
@@ -108,7 +151,7 @@ router.get('/title/:title', async (req, res) => {
 });
 
 //Users - Get Details by Id
-router.get('/id/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const id = req.params.id;
         
@@ -126,7 +169,7 @@ router.get('/id/:id', async (req, res) => {
 });
 
 //Users - get all manga
-router.get('/all', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         
         const manga = await MangaDetails.find({});
@@ -144,7 +187,7 @@ router.get('/all', async (req, res) => {
 
 
 //Admin - DeleteDetails
-router.delete('/:id', async (req, res) =>{
+router.delete('/:id', isAdmin, async (req, res) =>{
     try {
         const id = req.params.id;
         
