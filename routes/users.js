@@ -4,6 +4,8 @@ const session = require ('express-session');
 const { User, createUser } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
+const xss = require('xss');
+
 
 const SALT_LENGTH = parseInt(process.env.SALT_LENGTH) || 16; 
 
@@ -23,21 +25,29 @@ router.use(session({
 
 router.post("/", async (req, res) => {
     try {
+        // Sanitize user inputs to prevent XSS attacks
+        const { username, email, password } = req.body;
+        const sanitizedUsername = xss(username);
+        const sanitizedEmail = xss(email);
+        const sanitizedPassword = xss(password);
+
         const { error } = validate(req.body);
         if (error)
             return res.status(400).send({ message: error.details[0].message });
 
         console.log("Creating a new user");
 
+        // Generate salt and hash the password
         const salt = crypto.randomBytes(SALT_LENGTH).toString('hex');
-        const hashedPassword = hashPassword(req.body.password, salt);
+        const hashedPassword = hashPassword(sanitizedPassword, salt);
 
         const userData = {
-            username: req.body.username,
-            email: req.body.email,
+            username: sanitizedUsername,
+            email: sanitizedEmail,
             password: hashedPassword
         };
 
+        // Create the user
         const createdUser = await createUser(userData); 
 
         console.log("User created successfully");
@@ -45,7 +55,7 @@ router.post("/", async (req, res) => {
         const foundUser = await User.findById(createdUser._id); 
         console.log("User found in the database:", foundUser);
 
-        //here the session variables are set
+        // Set session variables
         req.session.userId = foundUser._id;
         req.session.userRole = 'user';
 

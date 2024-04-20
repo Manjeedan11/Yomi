@@ -4,6 +4,7 @@ const { User } = require("../models/user");
 const Joi = require("joi");
 const crypto = require("crypto");
 const session = require ('express-session');
+const bcrypt = require('bcrypt');
 
 const HASH_ITERATIONS = parseInt(process.env.HASH_ITERATIONS) || 10000; 
 const HASH_KEY_LENGTH = parseInt(process.env.HASH_KEY_LENGTH) || 64; 
@@ -25,12 +26,17 @@ router.use(session({
 
 router.post("/", async (req, res) => {
     try {
+        // Sanitize 
+        const { email, password } = req.body;
+        const sanitizedEmail = xss(email);
+        const sanitizedPassword = xss(password);
+
         const { error } = validate(req.body);
         if (error)
             return res.status(400).send({ message: error.details[0].message });
 
         console.log("Looking up the user");
-        const user = await User.findOne({ email: req.body.email });
+        const user = await User.findOne({ email: sanitizedEmail });
         if (!user) {
             console.log("User not found");
             return res.status(401).send({ message: "Invalid Email or Password" });
@@ -42,7 +48,7 @@ router.post("/", async (req, res) => {
             return res.status(500).send({ message: "Salt or hashed password not found for the user" });
         }
 
-        const passwordMatch = validatePassword(req.body.password, user.salt, user.password);
+        const passwordMatch = validatePassword(sanitizedPassword, user.salt, user.password);
         if (!passwordMatch) {
             console.log("Invalid password");
             return res.status(401).send({ message: "Invalid Email or Password" });
@@ -56,16 +62,21 @@ router.post("/", async (req, res) => {
         const token = generateAuthToken(user._id);
         res.status(200).send({ data: token, message: "Logged in successfully" });
 
-
     } catch (error) {
         console.error("Error during authentication:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
-
-    
 });
 
+    
+
 const validate = (data) => {
+    // Sanitize input data to prevent XSS attacks
+    const sanitizedData = {
+        email: xss(data.email),
+        password: xss(data.password)
+    };
+
     const schema = Joi.object({
         email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }).required().label("Email")
             .messages({
@@ -77,12 +88,17 @@ const validate = (data) => {
                 'string.length': 'Password must be minimum 8 characters long',
             }),
     });
-    return schema.validate(data);
+    return schema.validate(sanitizedData);
 }
 
-function validatePassword(password, salt, hashedPassword) {
-    const hashedInputPassword = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), HASH_ITERATIONS, HASH_KEY_LENGTH, HASH_ALGORITHM).toString('hex');
-    return hashedInputPassword === hashedPassword;
+async function validatePassword(password, hashedPassword) {
+    try {
+        const match = await bcrypt.compare(password, hashedPassword);
+        return match;
+    } catch (error) {
+        console.error('Error validating password:', error);
+        return false;
+    }
 }
 
 function generateAuthToken(userId) {
