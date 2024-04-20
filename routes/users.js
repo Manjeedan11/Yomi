@@ -11,7 +11,7 @@ router.use(session({
     secret: 'hatsune miku',
     cookie: {maxAge: 1000 * 60 * 60} , //set to expire after an hour
     resave: false,
-    saveUnitialized: false
+    saveUninitialized: false
 }))
 
 router.post("/", async (req, res) => {
@@ -31,15 +31,15 @@ router.post("/", async (req, res) => {
             password: hashedPassword
         };
 
-        await createUser(userData);
+        const createdUser = await createUser(userData); 
 
         console.log("User created successfully");
         console.log("Looking up the created user in the database");
-        const createdUser = await User.findById(user._id); 
-        console.log("User found in the database:", createdUser);
+        const foundUser = await User.findById(createdUser._id); 
+        console.log("User found in the database:", foundUser);
 
-        //here the session variables are set
-        req.session.userId = user._id;
+        
+        req.session.userId = foundUser._id; // Set session variable with the user ID
 
         res.status(201).send({ message: "User created successfully" });
     } catch (error) {
@@ -62,7 +62,7 @@ const validate = (data) => {
                 'string.email': 'Invalid email format',
                 'string.empty': 'Email is required'
             }), 
-        password: Joi.string().min(8).required().label("Password")
+        password: Joi.string().length(8).required().label("Password")
             .messages({
                 'string.min': 'Password must be minimum 8 characters long',
             }),
@@ -71,7 +71,9 @@ const validate = (data) => {
 }
 
 function hashPassword(password, salt) {
-    return crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 64, 'sha512').toString('hex');
+    const derivedKey = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 10000, 8, 'sha512');
+    const hashedPassword = derivedKey.toString('hex').slice(0, 8); 
+    return hashedPassword;
 }
 
 module.exports = router;
