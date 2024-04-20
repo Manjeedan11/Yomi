@@ -78,12 +78,12 @@ router.get('/:title', async (req, res) => {
     }
 });
 
-//delete manga
-router.delete('/:title', async (req, res) =>{
+//Admin - DeleteDetails
+router.delete('/:id', async (req, res) =>{
     try {
-        const title = req.params.title;
+        const id = req.params.id;
         
-        const manga = await MangaDetails.findOneAndDelete({ title: title });
+        const manga = await MangaDetails.findByIdAndDelete(id);
 
         if (!manga) {
             return res.status(404).json({ message: "Manga details not found" });
@@ -94,6 +94,5 @@ router.delete('/:title', async (req, res) =>{
         res.status(500).json({message: "Unable to delete manga"})
     }
 })
-
 
 module.exports = router;
