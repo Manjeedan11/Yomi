@@ -60,4 +60,23 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+//Users can search for manga by title
+router.get('/:title', async (req, res) => {
+    try {
+        const title = req.params.title;
+        
+        const manga = await MangaDetails.findOne({ title: title });
+
+        if (!manga) {
+            return res.status(404).json({ message: "Manga details not found" });
+        }
+
+        res.json(manga);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
 module.exports = router;
