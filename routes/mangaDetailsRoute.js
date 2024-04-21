@@ -111,7 +111,7 @@ router.get('/title/:title', async (req, res) => {
         const manga = await MangaDetails.findOne({ title: sanitizedTitle });
 
         if (!manga) {
-            return res.status(404).json({ message: "Manga not found" });
+            return res.status(404).json({ message: "Manga not available" });
         }
         const serializedManga = serialize(manga);
         res.setHeader('Content-Type', 'application/json');

@@ -37,25 +37,25 @@ router.post("/", async (req, res) => {
         if (error)
             return res.status(400).send({ message: error.details[0].message });
 
-        console.log("Looking up the user");
+        //console.log("Looking up the user");
         const user = await User.findOne({ email: sanitizedEmail });
         if (!user) {
-            console.log("User not found");
+            //console.log("User not found");
             return res.status(401).send({ message: "Invalid Email or Password" });
         }
 
-        console.log("validating password");
+        //console.log("validating password");
         if (!user.salt || !user.password) {
             
-            console.error("Salt or hashed password not found for the user");
-            return res.status(500).send({ message: "Salt or hashed password not found for the user" });
+            //console.error("Salt or hashed password not found for the user");
+            return res.status(500).send({ message: "Password not found for the user" });
         }
         
         console.log(user);
 
         const passwordMatch = validatePassword(sanitizedPassword, user.salt, user.password);
         if (!passwordMatch) {
-            console.log("Invalid password");
+            //console.log("Invalid password");
             return res.status(401).send({ message: "Invalid Email or Password" });
         }
 
@@ -66,12 +66,12 @@ router.post("/", async (req, res) => {
         req.session.isLoggedIn = true;
         req.session.userRole = 'user';
 
-        console.log("Password validated, generating token");
+        //console.log("Password validated, generating token");
         const token = generateAuthToken(user._id);
         res.status(200).send({ data: token, user:user.username, message: "Logged in successfully" });
 
     } catch (error) {
-        console.error("Error during authentication:", error);
+        //console.error("Error during authentication:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 });

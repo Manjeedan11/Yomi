@@ -45,7 +45,7 @@ router.get("/checkAdmin", async (req, res) => {
 //creates an admin
 router.post("/", async (req, res) => {
     try {
-        console.log("Creating a new admin");
+        //console.log("Creating a new admin");
 
 
         const userData = {
@@ -56,10 +56,10 @@ router.post("/", async (req, res) => {
 
         const createdUser = await createAdmin(userData); 
 
-        console.log("User created successfully");
-        console.log("Looking up the created user in the database");
+        //console.log("User created successfully");
+        //console.log("Looking up the created user in the database");
         const foundUser = await Admin.findById(createdUser._id); 
-        console.log("User found in the database:", foundUser);
+        //console.log("User found in the database:", foundUser);
 
 
         res.status(201).send({ message: "Admin created successfully" });

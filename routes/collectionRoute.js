@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
 
         res.status(200).send({ message: "Manga added to collection successfully" });
     } catch (error) {
-        console.error("Error adding manga to collection:", error);
+        //console.error("Error adding manga to collection:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 });
@@ -55,7 +55,7 @@ router.delete('/', async (req, res) => {
             res.status(404).send({ message: "Manga not found in user's collection" });
         }
     } catch (error) {
-        console.error("Error removing manga from collection:", error);
+        //console.error("Error removing manga from collection:", error);
         res.status(500).send({ message: "Internal Server Error" });
     }
 });

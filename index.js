@@ -56,5 +56,5 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 
 app.get('/', (request, response) => {
     console.log(request);
-    return response.status(234).send('Welcome to Manga Discovery');
+    return response.status(234).send('');
 });

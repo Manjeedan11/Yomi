@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
         if (error)
             return res.status(400).send({ message: error.details[0].message });
 
-        console.log("Creating a new user");
+        //console.log("Creating a new user");
 
 
         const userData = {
@@ -50,7 +50,7 @@ router.post("/", async (req, res) => {
         // Create the user
         const createdUser = await createUser(userData); 
 
-        console.log("User created successfully");
+        //console.log("User created successfully");
         const foundUser = await User.findById(createdUser._id); 
         // Set session variables
         req.session.userId = foundUser._id;

@@ -50,7 +50,7 @@ const createAdmin = async (userData) => {
 
         await user.save();
 
-        console.log("User created successfully");
+        //console.log("User created successfully");
         return user;
     } catch (error) {
         console.error("Error creating user:", error);
