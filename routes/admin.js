@@ -33,6 +33,15 @@ router.use(session({
     saveUnitialized: false
 }))
 
+router.get("/checkAdmin", async (req, res) => {
+    try{
+        req.session.userRole === "admin"? res.status(201).send({ message: "Admin" }): res.status(401).send({ message: "Not Admin" });
+    }
+    catch(error) {
+        console.log("error");
+    }
+})
+
 //creates an admin
 router.post("/", async (req, res) => {
     try {

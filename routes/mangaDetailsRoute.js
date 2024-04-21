@@ -12,8 +12,9 @@ const isAdmin = (req, res, next) => {
         console.log("ROLE ", req.session.userRole);
         if (req.session.userRole !== 'admin') {
             return res.status(403).send({ message: "Access Forbidden: Not an admin" });
-            next();
+            
         }
+        next();
     }
     catch (error) {
         console.error(error);
