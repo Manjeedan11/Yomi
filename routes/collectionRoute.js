@@ -1,6 +1,21 @@
 const router = require("express").Router();
 const { User } = require("../models/user");
 const { mangaId } = require("../models/mangaDetails");
+const session = require ('express-session');
+
+router.use(session({
+    secret: 'hatsune miku',
+    genSid: function(req){
+        return crypto.randomBytes(32).toString('hex');
+    },
+    cookie: {
+        maxAge: 1000 * 60 * 60,
+        httpOnly: true,
+        secure: true
+    } , //set to expire after an hour
+    resave: false,
+    saveUninitialized: false
+}))
 
 router.post('/', async (req, res) => {
     try {
@@ -15,11 +30,13 @@ router.post('/', async (req, res) => {
         if (!user)
             return res.status(404).send({ message: "User not found" });
 
-        if (!user.collection)
-            user.collection = [];
+        if (!user.collections)
+            user.collections = [];
 
-        if (!user.collection.includes(mangaId))
-            user.collection.push(mangaId);
+        console.log("collection: ",user.collections);
+
+        if (!user.collections.includes(mangaId))
+            user.collections.push(mangaId);
 
         await user.save();
 
@@ -30,10 +47,38 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.delete('/', async (req, res) => {
+
+router.get('/', async (req, res) => {
     try {
         const userId = req.session.userId; // Accessing userId from session
-        const mangaId = req.body.mangaId;
+        console.log(userId);
+        if (!userId)
+            return res.status(400).send({ message: "User ID required" });
+
+        let user = await User.findById(userId);
+        console.log(user);
+
+        if (!user)
+            return res.status(404).send({ message: "User not found" });
+
+        if (!user.collections)
+            user.collections = [];
+
+        console.log("collection: ",user.collections);
+
+        res.status(200).send(user.collections);
+    } catch (error) {
+        console.error("Error adding manga to collection:", error);
+        res.status(500).send({ message: "Internal Server Error" });
+    }
+});
+
+
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const userId = req.session.userId; // Accessing userId from session
+        const mangaId = req.params.id;
 
         if (!userId || !mangaId)
             return res.status(400).send({ message: "User ID and Manga ID are required" });
@@ -43,12 +88,12 @@ router.delete('/', async (req, res) => {
         if (!user)
             return res.status(404).send({ message: "User not found" });
 
-        if (!user.collection)
-            user.collection = [];
+        if (!user.collections)
+            user.collections = [];
 
-        const index = user.collection.indexOf(mangaId);
+        const index = user.collections.indexOf(mangaId);
         if (index !== -1) {
-            user.collection.splice(index, 1);
+            user.collections.splice(index, 1);
             await user.save();
             res.status(200).send({ message: "Manga removed from collection successfully" });
         } else {
