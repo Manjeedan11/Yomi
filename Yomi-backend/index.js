@@ -16,7 +16,7 @@ connection();
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://yomi-frontend.vercel.app/",
+    origin: "https://yomi-frontend.vercel.app",
     credentials: true,
   })
 );
